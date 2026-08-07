@@ -1,5 +1,5 @@
 # Gym-Membership-System
-Year 1 Sem 1 Final COding Project for TARUMT
+Year 1 Sem 1 Final Coding Project for TARUMT
 
 
 
