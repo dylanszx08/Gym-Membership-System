@@ -1,2 +1,2 @@
 # Gym-Membership-System
-School Semester 1 Project
+Year 1 Sem 1 Final Project for TARUMT
