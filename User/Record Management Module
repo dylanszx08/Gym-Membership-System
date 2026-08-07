@@ -1,8 +1,3 @@
-#include <iostream>
-#include <string>
-using namespace std;
-
-int main() {
 	//VARIABLE DECLARATION
 	//SIGN UP/ LOG IN VARIABLES
 	string usernameSU;
@@ -69,4 +64,4 @@ int main() {
 		
 	}
 	
-}
+
