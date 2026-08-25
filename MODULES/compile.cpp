@@ -2,7 +2,7 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
-
+#include <ctime>
 using namespace std;
 
 // function 1: add service
@@ -109,7 +109,7 @@ void personal() {
         else if (afteraddservice == 3) {
             cout << "Please proceed to pay" << endl;
         }
-        else if (afteraddservice <= 0 && afteraddservice >= 4) {
+        else if (afteraddservice <= 0 || afteraddservice >= 4) {
             cout << "\033[2J\033[1;1H";
             cout << "Invalid choice. Please select a valid option." << endl;
         }
@@ -125,8 +125,9 @@ void coach() {
     cout << "3. Life time membership: RM3500" << endl;
     cout << "Your choice: ";
     // jmp to bill
-    cin >> afteraddservice_coach;
+    
     do {
+        cin >> afteraddservice_coach;
         if (afteraddservice_coach == 1) {
             cout << "Please proceed to pay" << endl;
         }
@@ -145,6 +146,7 @@ void coach() {
 
 const int MAX_MEMBERS = 50;
 const int MAX_SERVICES = 2;
+
 struct Member {
     int id;
     string name;
@@ -165,21 +167,37 @@ void Member_subscription();  // Student B's Module [6, 7]
 void runTrainerScheduling(Member members[], int loggedInIndex); // Student C's Module [6, 7]
 
 int main() {
+    Member members[MAX_MEMBERS];
+    int memberCount = 0; // Tracks loaded and registered members
+    int portalChoice;
     fstream customer;
-    customer.open("customer.txt");
-    if (!customer.is_open()) {
+    customer.open("customer.txt", fstream::in);
 
-        cout << "Issue with save file";
-            return 1;
+    if (customer.is_open()) {
+
+        while (memberCount < MAX_MEMBERS &&
+            customer >> members[memberCount].id) {
+            customer.ignore();
+            getline(customer, members[memberCount].name);
+            getline(customer, members[memberCount].password);
+
+
+
+            memberCount++;
+        }
+          customer.close();
+}
+    
+    else {
+       
+        cout << "Failed to load file" << endl;
+        cout << "Press Enter to continue...";
+        cin.get();
     }
 
+    srand(static_cast<unsigned int>(time(NULL)));
 
-    srand(time(NULL));
-
-    Member members[MAX_MEMBERS];
-    int memberCount = 0;
-    int portalChoice;
-
+    // 2. Access Portal Loop
     do {
         system("cls");
         cout << "===================================\n";
@@ -191,14 +209,14 @@ int main() {
         cout << "Choice (1-3): ";
         cin >> portalChoice;
 
-        // Input validation [2]
+        // Input validation
         while (cin.fail() || portalChoice < 1 || portalChoice > 3) {
             cin.clear();
-            cin.ignore(100, '\n'); // [9]
+            cin.ignore(100, '\n');
             cout << "Invalid choice! Enter 1-3: ";
             cin >> portalChoice;
         }
-        cin.ignore(); // Clear buffer [10]
+        cin.ignore(); // Clear newline buffer
 
         if (portalChoice == 1) {
             system("cls");
@@ -209,11 +227,12 @@ int main() {
         else if (portalChoice == 2) {
             system("cls");
             string usernameLI, passwordLI;
+
             cout << "==== Log In =====" << endl;
             cout << "Username: ";
-            getline(cin, usernameLI); // [11]
+            getline(cin, usernameLI);
 
-            // Linear search to find the user in the database [2]
+            // Linear search to verify user credentials
             int userIndex = -1;
             for (int i = 0; i < memberCount; i++) {
                 if (members[i].name == usernameLI) {
@@ -231,7 +250,7 @@ int main() {
 
             cout << "Password: ";
             cin >> passwordLI;
-            cin.ignore(); // Clear buffer [10]
+            cin.ignore();
 
             if (members[userIndex].password != passwordLI) {
                 cout << "Incorrect password! Log in failed.\n";
@@ -240,12 +259,12 @@ int main() {
                 continue;
             }
 
-            // Successfully Logged In -> Enter Main Menu [12]
+            // Dashboard Sub-menu
             int systemChoice;
             do {
                 system("cls");
                 cout << "===================================\n";
-                cout << "       GYM MEMBERSHIP SYSTEM       \n";
+                cout << "        GYM MEMBERSHIP SYSTEM       \n";
                 cout << "===================================\n";
                 cout << "WELCOME " << members[userIndex].name << " (ID: " << members[userIndex].id << ")!!!\n\n";
                 cout << "1. Member Management (Sub-Menu)\n";
@@ -257,13 +276,12 @@ int main() {
 
                 while (cin.fail() || systemChoice < 1 || systemChoice > 4) {
                     cin.clear();
-                    cin.ignore(100, '\n'); // [9]
+                    cin.ignore(100, '\n');
                     cout << "Invalid choice! Enter 1-4: ";
                     cin >> systemChoice;
                 }
 
                 if (systemChoice == 1) {
-                    // Sub-menu for Member Management
                     int subChoice;
                     do {
                         system("cls");
@@ -284,7 +302,7 @@ int main() {
                         }
                         else if (subChoice == 2) {
                             system("cls");
-                            deleteMember(members, &memberCount); // Pass address for Pointer (*)
+                            deleteMember(members, &memberCount);
                             cout << "\nPress Enter to continue...";
                             cin.ignore(); cin.get();
                         }
@@ -325,9 +343,12 @@ void signUpMember(Member members[], int& count) {
     }
 
     string username;
+    string password;
     cout << "==== Sign Up ====\n";
     cout << "Enter username: ";
     getline(cin, username);
+   
+ 
 
 
 
@@ -343,15 +364,17 @@ void signUpMember(Member members[], int& count) {
         cout << "Username already taken! Try another one.\n";
         return;
     }
+  
 
     cout << "Enter password: ";
     cin >> members[count].password;
     cin.ignore(); // Clear buffer [10]
- 
+    password = members[count].password;
     // Scale random 4-digit ID: rand() % ((max + 1) - min) + min [13]
     // max = 9999, min = 1000 -> rand() % 9000 + 1000
     int randomID;
     int idExists;
+
     do {
         randomID = rand() % 9000 + 1000;
         idExists = 0;
@@ -368,9 +391,16 @@ void signUpMember(Member members[], int& count) {
     members[count].name = username;
     members[count].paymentMethod = "Not yet picked";
     members[count].trainer = "Not yet picked";
+    
     ofstream customer("customer.txt", ios::app);
-    customer << randomID << endl;
-    customer << username << endl;
+    if (customer.is_open()) {
+
+        customer << randomID << endl;
+        customer << username << endl;
+        customer << password << endl;
+        customer.close();
+    }
+    else cout << "customer details could not be saved sucessfully";
     // User-friendly display box for the randomized ID
     cout << "\n==================================================\n";
     cout << "            REGISTRATION SUCCESSFUL!              \n";
