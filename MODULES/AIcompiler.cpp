@@ -49,12 +49,11 @@ int slotStartHours[time_booking] = { 9, 11, 13, 15, 17, 19 };
 
 // --- Function Prototypes ---
 void init_places();
+void displayUserBookings(int userId);
 void create_transaction(Member members[], int loggedInIndex);
-void list_transaction(Member members[], int loggedInIndex);
 void create_booking(int userId, string userName);
 void modify_booking(int userId, string userName);
 void search_booking();
-void display_booking_summary();
 bool display_timetable(int userId, string userName);
 
 // Services / Subscription module prototypes
@@ -75,17 +74,43 @@ void displayMembers(Member members[], int count);
 // Trainer scheduling (Student C's Module)
 void runTrainerScheduling(Member members[], int loggedInIndex);
 
-// Initialize array values
+// Initialize array values and date titles
 void init_places() {
+    time_t now = time(0);
     for (int d = 0; d < date_booking; d++) {
-        for (int t = 0; t < time_booking; t++) {
-            available_places[d][t] = MAX_PLACES;
+        time_t t = now + (d * 86400);
+        tm day = *localtime(&t);
+        char buffer[20];
+        strftime(buffer, sizeof(buffer), "%d %b (%a)", &day);
+        dateSlot[d] = buffer;
+
+        for (int time_idx = 0; time_idx < time_booking; time_idx++) {
+            available_places[d][time_idx] = MAX_PLACES;
             for (int s = 0; s < MAX_PLACES; s++) {
-                slot_bookings[d][t][s].active = false;
-                slot_bookings[d][t][s].userId = 0;
-                slot_bookings[d][t][s].name[0] = '\0';
+                slot_bookings[d][time_idx][s].active = false;
+                slot_bookings[d][time_idx][s].userId = 0;
+                slot_bookings[d][time_idx][s].name[0] = '\0';
             }
         }
+    }
+}
+
+// Helper to print bookings directly on the main user dashboard
+void displayUserBookings(int userId) {
+    cout << "  ACTIVE BOOKINGS:\n";
+    bool hasBooking = false;
+    for (int d = 0; d < date_booking; d++) {
+        for (int t = 0; t < time_booking; t++) {
+            for (int s = 0; s < MAX_PLACES; s++) {
+                if (slot_bookings[d][t][s].active && slot_bookings[d][t][s].userId == userId) {
+                    cout << "   - " << dateSlot[d] << " @ " << timeSlot[t] << "\n";
+                    hasBooking = true;
+                }
+            }
+        }
+    }
+    if (!hasBooking) {
+        cout << "   - No active slot bookings.\n";
     }
 }
 
@@ -155,14 +180,22 @@ int main() {
                 continue;
             }
 
-            // Logged in menu loop
+            // MAIN DASHBOARD (DASHBOARD UPDATED TO SHOW BOOKINGS IMMEDIATELY)
             int systemChoice;
             do {
                 system("cls");
-                cout << "===================================\n";
-                cout << "       GYM MEMBERSHIP SYSTEM       \n";
-                cout << "===================================\n";
-                cout << "WELCOME " << members[userIndex].name << " (ID: " << members[userIndex].id << ")!!!\n\n";
+                cout << "===================================================\n";
+                cout << "               GYM MEMBER DASHBOARD                \n";
+                cout << "===================================================\n";
+                cout << " WELCOME: " << members[userIndex].name << " (ID: " << members[userIndex].id << ")\n";
+                cout << " PAYMENT METHOD : " << members[userIndex].paymentMethod << "\n";
+                cout << " ASSIGNED TRAINER: " << members[userIndex].trainer << "\n";
+                cout << "---------------------------------------------------\n";
+
+                // Print user's live bookings directly on the main screen
+                displayUserBookings(members[userIndex].id);
+
+                cout << "===================================================\n";
                 cout << "1. Member Management (Sub-Menu)\n";
                 cout << "2. Member Subscription & Booking (Module B)\n";
                 cout << "3. Trainer Scheduling (Module C)\n";
@@ -399,24 +432,26 @@ void Member_subscription(Member members[], int loggedInIndex) {
     int subMenuChoice;
     do {
         system("cls");
-        cout << "========================================\n";
-        cout << "     SUBSCRIPTION & BOOKING SYSTEM      \n";
-        cout << "========================================\n";
+        cout << "======================================================\n";
+        cout << "            SUBSCRIPTION & BOOKING SYSTEM             \n";
+        cout << "======================================================\n";
         cout << " User: " << members[loggedInIndex].name
             << " | ID: " << members[loggedInIndex].id << endl;
-        cout << " Current Payment Method: " << members[loggedInIndex].paymentMethod << endl;
-        cout << "----------------------------------------\n";
-        cout << "1. Manage Gym Plans / Services\n";
+        cout << " Active Payment Info: " << members[loggedInIndex].paymentMethod << endl;
+        cout << "------------------------------------------------------\n";
+        displayUserBookings(members[loggedInIndex].id);
+        cout << "------------------------------------------------------\n";
+        cout << "1. Select Gym Plan (Triggers Payment)\n";
         cout << "2. Create Slot Booking\n";
         cout << "3. Modify Slot Booking\n";
         cout << "4. Search Bookings\n";
-        cout << "5. Add / Update Payment Details\n";
-        cout << "6. Back to Main Menu\n";
+        cout << "5. Update Saved Payment Method\n";
+        cout << "6. Back to Dashboard\n";
         cout << "Choice (1-6): ";
         cin >> subMenuChoice;
 
         switch (subMenuChoice) {
-        case 1: display_services(members, loggedInIndex); break;
+        case 1: add_service(members, loggedInIndex); break;
         case 2: create_booking(members[loggedInIndex].id, members[loggedInIndex].name); break;
         case 3: modify_booking(members[loggedInIndex].id, members[loggedInIndex].name); break;
         case 4: search_booking(); break;
@@ -474,8 +509,8 @@ void personal(Member members[], int loggedInIndex) {
     cin >> choice;
 
     if (choice >= 1 && choice <= 3) {
-        cout << "\n[+] Service added! Please proceed to payment details setup.\n";
-        cout << "\nPress Enter to return...";
+        cout << "\n[+] Plan selected! Moving directly to payment...\n";
+        cout << "Press Enter to enter payment details...";
         cin.ignore(); cin.get();
         create_transaction(members, loggedInIndex);
     }
@@ -492,8 +527,8 @@ void coach(Member members[], int loggedInIndex) {
     cin >> choice;
 
     if (choice >= 1 && choice <= 3) {
-        cout << "\n[+] Service added! Please proceed to payment details setup.\n";
-        cout << "\nPress Enter to return...";
+        cout << "\n[+] Plan selected! Moving directly to payment...\n";
+        cout << "Press Enter to enter payment details...";
         cin.ignore(); cin.get();
         create_transaction(members, loggedInIndex);
     }
@@ -540,7 +575,6 @@ void create_transaction(Member members[], int loggedInIndex) {
         cout << "Expiry Date MM/YY: ";
         cin.getline(card_exp, 10);
 
-        // Update active member struct string
         members[loggedInIndex].paymentMethod = cardType + string(card_num) + ")";
 
         cout << "\n[+] Payment method recorded successfully for User ID "
@@ -559,11 +593,6 @@ bool display_timetable(int userId, string userName) {
 
     cout << "------- DATE -------" << endl;
     for (int i = 0; i < date_booking; i++) {
-        time_t t = now + (i * 86400);
-        tm day = *localtime(&t);
-        char buffer[20];
-        strftime(buffer, sizeof(buffer), "%d %b (%a)", &day);
-        dateSlot[i] = buffer;
         cout << (i + 1) << ". " << dateSlot[i] << endl;
     }
 
@@ -604,7 +633,6 @@ bool display_timetable(int userId, string userName) {
             else if (available_places[d][t] > 0) {
                 int seat_index = MAX_PLACES - available_places[d][t];
 
-                // Link booking directly to logged in user details
                 slot_bookings[d][t][seat_index].userId = userId;
                 strncpy(slot_bookings[d][t][seat_index].name, userName.c_str(), 49);
                 slot_bookings[d][t][seat_index].active = true;
