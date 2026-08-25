@@ -5,7 +5,6 @@
 #include <cctype>
 #include <ctime>
 #include <iomanip>
-#include <vector>
 #include <fstream>
 
 using namespace std;
