@@ -6,16 +6,28 @@
 using namespace std;
 
 // function 1: add service
-void add_service();
-void display_services();
-void personal();
-void coach();
+void Member_subscription(Member members[], int customermembership, int count);
+void display_services(Member members[], int customermembership, int count);
+void add_service(Member members[], int customermembership, int count);
+void personal(Member members[], int customermembership, int count);
+void coach(Member members[], int customermembership, int count);
 
 // function 2: remove service
 void removeservice();
-
+void saveAllMembersToFile(const Member members[], int count) {
+    ofstream customer("customer.txt", ios::trunc);
+    if (customer.is_open()) {
+        for (int i = 0; i < count; i++) {
+            customer << members[i].id << endl;
+            customer << members[i].name << endl;
+            customer << members[i].password << endl;
+            customer << members[i].membership << endl;
+        }
+        customer.close();
+    }
+}
 // let user choose
-void display_services() {
+void display_services(Member members[], int customermembership, int count) {
     int choice;
 
     cout << "Gym Membership Services" << endl;
@@ -28,39 +40,42 @@ void display_services() {
     cout << "5. Display all services you own" << endl;
     cout << "Your choice: ";
 
-    cin >> choice;
-    switch (choice) {
-    case 1:
+    
+    do {
+        cin >> choice;
+        if (choice == 1) {
         cout << "\033[2J\033[1;1H";
-        add_service();
-        break;
-    case 2:
+        add_service(members, customermembership, count);
+    }
+        else if(choice == 2){ 
         cout << "\033[2J\033[1;1H";
         cout << "You have selected remove service." << endl;
-        break;
-    case 3:
-        cout << "\033[2J\033[1;1H";
-        cout << "You have selected upgrade service." << endl;
-        break;
-    case 4:
-        cout << "\033[2J\033[1;1H";
-        cout << "You have selected renew service." << endl;
-        break;
-    case 5:
-        cout << "\033[2J\033[1;1H";
-        cout << "You have selected display all service you own." << endl;
-        break;
-
-    default:
-        cout << "\033[2J\033[1;1H";
-        cout << "Invalid choice. Please select a valid option." << endl;
-        display_services();
-        break;
-    }
+            removeservice(members, customermembership, count);
+        }
+        else if (choice == 3) {
+            cout << "\033[2J\033[1;1H";
+            cout << "You have selected upgrade service." << endl;
+        }
+        else if (choice == 4) {
+            cout << "\033[2J\033[1;1H";
+            cout << "You have selected renew service." << endl;
+        }
+        else if  (choice == 5) {
+            cout << "\033[2J\033[1;1H";
+            cout << "You have selected display all service you own." << endl;
+        }
+        else {
+            cout << "\033[2J\033[1;1H";
+            cout << "Invalid choice. Please select a valid option." << endl;
+            cin.clear();
+            cin.ignore(100, '\n');
+        }
+     
+    } while (choice <= 0 || choice >= 6);
 }
 
 // adding new serivce        
-void add_service() {
+void add_service(Member members[], int customermembership, int count) {
 
     cout << "You have selected to add a new service." << endl;
 
@@ -74,11 +89,11 @@ void add_service() {
     switch (addservicechoice) {
     case 1:
         cout << "\033[2J\033[1;1H";
-        personal();
+        personal(members, customermembership, count);
         break;
     case 2:
         cout << "\033[2J\033[1;1H";
-        coach();
+        coach(members, customermembership, count);
         break;
     default:
         cout << "\033[2J\033[1;1H";
@@ -87,8 +102,9 @@ void add_service() {
     }
 }
 
-void personal() {
+void personal(Member members[], int customermembership, int count) {
     int afteraddservice;
+
     do {
         cout << "\033[2J\033[1;1H";
         cout << "You have selected to add Personal Training." << endl;
@@ -99,25 +115,55 @@ void personal() {
         cout << "Your choice: ";
         cin >> afteraddservice;
         // jmp to bill
-
+        
         if (afteraddservice == 1) {
             cout << "Please proceed to pay" << endl;
+            ofstream customer("customer", ios::app);
+            if (customer.is_open())
+                members[customermembership].membership = "Monthly coach membership";
+            customer.close();
+            if (!customer.is_open())
+                cout << "cannot save membership";
         }
         else if (afteraddservice == 2) {
             cout << "Please proceed to pay" << endl;
+            ofstream customer("customer", ios::app);
+            if (customer.is_open())
+                customer << yearly_membership << endl;
+            customer.close();
+            if (!customer.is_open())
+                cout << "cannot save membership";
         }
         else if (afteraddservice == 3) {
             cout << "Please proceed to pay" << endl;
+            ofstream customer("customer", ios::app);
+            if (customer.is_open())
+                customer << lifetime_membership << endl;
+            customer.close();
+            if (!customer.is_open())
+                cout << "cannot save membership";
         }
         else if (afteraddservice <= 0 || afteraddservice >= 4) {
             cout << "\033[2J\033[1;1H";
             cout << "Invalid choice. Please select a valid option." << endl;
         }
     } while (afteraddservice <= 0 || afteraddservice >= 4);
+    
+    
+
 }
 
-void coach() {
+void coach(Member members[], int customermembership, int count) {
     int afteraddservice_coach;
+ 
+    string monthly_coach_membership;
+    string yearly_coach_membership;
+    string lifetime_coach_membership;
+
+    monthly_coach_membership = "Monthly coach membership";
+    yearly_coach_membership = "Yearly coach membership";
+    lifetime_coach_membership = "Life time coach membership";
+
     cout << "You have selected to add Coach Training." << endl;
     cout << "Please choose your interested membership: " << endl;
     cout << "1. Monthly membership: RM80/month" << endl;
@@ -130,12 +176,30 @@ void coach() {
         cin >> afteraddservice_coach;
         if (afteraddservice_coach == 1) {
             cout << "Please proceed to pay" << endl;
+            ofstream customer("customer", ios::app);
+            if (customer.is_open())
+                customer << monthly_coach_membership << endl;
+            customer.close();
+            if (!customer.is_open())
+                cout << "cannot save caoch membership";
         }
         else if (afteraddservice_coach == 2) {
             cout << "Please proceed to pay" << endl;
+            ofstream customer("customer", ios::app);
+            if (customer.is_open())
+                customer << yearly_coach_membership << endl;
+            customer.close();
+            if (!customer.is_open())
+                cout << "cannot save coach membership";
         }
         else if (afteraddservice_coach == 3) {
             cout << "Please proceed to pay" << endl;
+            ofstream customer("customer", ios::app);
+            if (customer.is_open())
+                customer << lifetime_coach_membership << endl;
+            customer.close();
+            if (!customer.is_open())
+                cout << "cannot save coach membership";
         }
         else if (afteraddservice_coach <= 0 || afteraddservice_coach >= 4) {
             cout << "\033[2J\033[1;1H";
@@ -146,13 +210,24 @@ void coach() {
 
 const int MAX_MEMBERS = 50;
 const int MAX_SERVICES = 2;
+struct membership {
 
+    string monthly_coach_membership;
+    string yearly_coach_membership;
+    string lifetime_coach_membership;
+    string monthly_membership;
+    string yearly_membership;
+    string lifetime_membership;
+
+
+};
 struct Member {
     int id;
     string name;
     string password;
     string paymentMethod; // ZIHIN
     string trainer;       // HILSON
+    string membership;
 };
 
 // --- DYLAN RECORD MANAGEMENT MODULE
@@ -164,7 +239,7 @@ void displayMembers(Member members[], int count);     // 5. Display All Records 
 
 // --- Teammate Integration Placeholders ---
 void Member_subscription();  // Student B's Module [6, 7]
-void runTrainerScheduling(Member members[], int loggedInIndex); // Student C's Module [6, 7]
+
 
 int main() {
     Member members[MAX_MEMBERS];
@@ -180,6 +255,7 @@ int main() {
             customer.ignore();
             getline(customer, members[memberCount].name);
             getline(customer, members[memberCount].password);
+            getline(customer, members[memberCount].membership);
 
 
 
@@ -323,9 +399,9 @@ int main() {
                 else if (systemChoice == 2) {
                     Member_subscription();
                 }
-                else if (systemChoice == 3) {
-                    runTrainerScheduling(members, userIndex);
-                }
+                //else if (systemChoice == 3) {
+                //    runTrainerScheduling(members, userIndex);
+                //}
             } while (systemChoice != 4);
         }
     } while (portalChoice != 3);
@@ -523,28 +599,28 @@ void displayMembers(Member members[], int count) {
 // --- Teammate Integration Placeholders ---
 // =================================================================
 
-void Member_subscription() {
+void Member_subscription(Member members[], int customermembership, int count) {
     system("cls");
-    display_services();
+    display_services(members,customermembership,count);
 }
 
-void runTrainerScheduling(Member members[], int loggedInIndex) {
-    system("cls");
-    cout << "--- Trainer Scheduling (Student C Module) ---\n";
-    cout << "Logged in user: " << members[loggedInIndex].name << endl;
-    cout << "Current Assigned Trainer: " << members[loggedInIndex].trainer << endl << endl;
+//void runTrainerScheduling(Member members[], int loggedInIndex) {
+//    system("cls");
+//    cout << "--- Trainer Scheduling (Student C Module) ---\n";
+//    cout << "Logged in user: " << members[loggedInIndex].name << endl;
+//    cout << "Current Assigned Trainer: " << members[loggedInIndex].trainer << endl << endl;
+//
+//    int choice;
+//    cout << "1. Coach Alex (Fitness)\n2. Coach Sarah (Strength)\nChoice: ";
+//    cin >> choice;
+//    if (choice == 1) members[loggedInIndex].trainer = "Coach Alex";
+//    else if (choice == 2) members[loggedInIndex].trainer = "Coach Sarah";
+//
+//    cout << "\nTrainer assigned by Teammate C's Logic!\n";
+//    cout << "Press Enter to continue...";
+//    cin.ignore(); cin.get();
+//}
 
-    int choice;
-    cout << "1. Coach Alex (Fitness)\n2. Coach Sarah (Strength)\nChoice: ";
-    cin >> choice;
-    if (choice == 1) members[loggedInIndex].trainer = "Coach Alex";
-    else if (choice == 2) members[loggedInIndex].trainer = "Coach Sarah";
-
-    cout << "\nTrainer assigned by Teammate C's Logic!\n";
-    cout << "Press Enter to continue...";
-    cin.ignore(); cin.get();
-}
-
-void removeservice() {
+void removeservice(Member members[], int customermembership, int count) {
     cout << "Please select the services you want to remove;" << endl;
 }
