@@ -19,6 +19,7 @@ struct Member {
 // function 1: add service
 void Member_subscription(Member members[], int customermembership, int count);
 void display_services(Member members[], int customermembership, int count);
+void customer_membership(Member members[], int customermembership, int count);
 void add_service(Member members[], int customermembership, int count);
 void upgrade_service(Member members[], int customermembership, int count);
 void renew_service(Member members[], int customermembership, int count);
@@ -112,7 +113,7 @@ int main() {
                 if (members[i].name == usernameLI) {
                     userIndex = i;
                     break;
-                }int loggedInID = members[userIndex].id;
+                }
             }
 
             if (userIndex == -1) {
@@ -132,7 +133,7 @@ int main() {
                 cin.get();
                 continue;
             }
-
+            int loggedInID = members[userIndex].id;
             // Dashboard Sub-menu
             int systemChoice;
             do {
@@ -193,6 +194,19 @@ int main() {
                             cin.ignore(); cin.get();
                         }
                     } while (subChoice != 5);
+                    int newIndex = -1;
+                    for (int i = 0; i < memberCount; i++) {
+                        if (members[i].id == loggedInID) {
+                            newIndex = i;
+                            break;
+                        }
+                    }
+                    if (newIndex == -1) {
+                        cout << "Your account no longer exists. Logging out...\n";
+                        cin.ignore(); cin.get();
+                        break;
+                    }
+                    userIndex = newIndex;
                 }
                 else if (systemChoice == 2) {
                     Member_subscription(members, userIndex, memberCount);
@@ -476,7 +490,7 @@ void display_services(Member members[], int customermembership, int count) {
         else if (choice == 5) {
             cout << "\033[2J\033[1;1H";
             cout << "You have selected display all service you own." << endl;
-            display_services(members, customermembership, count);
+            customer_membership(members, customermembership, count);
         }
         else {
             cout << "\033[2J\033[1;1H";
