@@ -347,10 +347,11 @@ void trainerSchedulingMenu() {
         cout << "========================================" << endl;
         cout << "Select a function: ";
 
-        if (!(cin >> choose)) {
+        while (cin.fail() || choose < 0 || choose > 7) {
             cin.clear();
             cin.ignore(1000, '\n');
-            continue;
+            cout << "Invalid choice! Enter 0-7: ";
+            cin >> choose;
         }
 
         switch (choose) {
@@ -1358,7 +1359,7 @@ void modify_transaction() {
 }
 
 void list_transaction() {
-    cout << "==================================================================================\n";
+    cout << "\n==================================================================================\n";
     cout << "                            LIST OF PAYMENT TRANSACTIONS                          \n";
     cout << "==================================================================================\n";
 
