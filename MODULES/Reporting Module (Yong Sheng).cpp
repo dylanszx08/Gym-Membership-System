@@ -138,8 +138,8 @@ void generateDetailedReport(const Member members[], int memberCount);
 void calculateStatistics(const Member members[], int memberCount);
 void sortRecords(const Member members[], int memberCount);
 void displayAnalysis(const Member members[], int memberCount);
-double calculateMemberFee(const Member& m); // 輔助計算每位會員的累計金額
-int getValidChoiceStudentD(int min, int max); // 專屬 Student D 的防呆輸入驗證
+double calculateMemberFee(const Member& m); 
+int getValidChoiceStudentD(int min, int max); 
 
 // ============================================================
 //  FUNCTION PROTOTYPES - Menu glue
