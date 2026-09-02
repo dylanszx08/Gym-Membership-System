@@ -1,8 +1,5 @@
-//// ============================================================
+// ============================================================
 //  GYM MANAGEMENT SYSTEM - COMBINED BUILD
-//  Merges:
-//    - Member Management / Membership Subscription module
-//    - Trainer Scheduling (Booking) & Payment Transaction module
 // ============================================================
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
@@ -89,6 +86,11 @@ char timeSlot[TOTAL_TIMES][30] = {
 };
 
 // ============================================================
+//  FUNCTION PROTOTYPES - Helper Header Display
+// ============================================================
+void displayUserHeader(const Member& m);
+
+// ============================================================
 //  FUNCTION PROTOTYPES - Member Module
 // ============================================================
 void Member_subscription(Member members[], int customermembership, int count);
@@ -115,19 +117,19 @@ int get_available_places(int d, int t);
 void add_to_history(int userId, const char name[], const char date[], const char slot[], const char status[]);
 void save_all_data();
 void load_all_data();
-void create_transaction();
-void modify_transaction();
+void create_transaction(int loggedInID);
+void modify_transaction(int loggedInID);
 void list_transaction();
-bool display_timetable();
-void create_booking();
-void modify_booking();
+bool display_timetable(const Member& currentMember);
+void create_booking(const Member& currentMember);
+void modify_booking(int loggedInID, const Member& currentMember);
 void search_booking();
-void display_booking_summary();
+void display_booking_summary(int loggedInID);
 
 // ============================================================
 //  FUNCTION PROTOTYPES - Student D (Reporting Module)
 // ============================================================
-void reportingModule(const Member members[], int memberCount);
+void reportingModule(const Member members[], int memberCount, const Member& currentMember);
 void generateSummaryReport(const Member members[], int memberCount);
 void generateDetailedReport(const Member members[], int memberCount);
 void calculateStatistics(const Member members[], int memberCount);
@@ -139,7 +141,18 @@ int getValidChoiceStudentD(int min, int max);
 // ============================================================
 //  FUNCTION PROTOTYPES - Menu glue
 // ============================================================
-void trainerSchedulingMenu();
+void trainerSchedulingMenu(const Member& currentMember);
+
+// ============================================================
+//  HEADER DISPLAY HELPER
+// ============================================================
+void displayUserHeader(const Member& m) {
+    cout << "===========================================================\n";
+    cout << " LOGGED IN MEMBER : " << m.name << " (ID: " << m.id << ")\n";
+    cout << " Personal Sub     : " << (m.personalmembership.empty() ? "None" : m.personalmembership) << "\n";
+    cout << " Coach Sub        : " << (m.coachmembership.empty() ? "None" : m.coachmembership) << "\n";
+    cout << "===========================================================\n\n";
+}
 
 // ============================================================
 //  MAIN
@@ -226,10 +239,10 @@ int main() {
             int systemChoice;
             do {
                 system("cls");
+                displayUserHeader(members[userIndex]);
                 cout << "===================================\n";
                 cout << "        GYM MEMBERSHIP SYSTEM       \n";
                 cout << "===================================\n";
-                cout << "WELCOME " << members[userIndex].name << " (ID: " << members[userIndex].id << ")!!!\n\n";
                 cout << "1. Member Management (Sub-Menu)\n";
                 cout << "2. Member subscription (Teammate B Module)\n";
                 cout << "3. Trainer Scheduling (Teammate C Module)\n";
@@ -247,6 +260,7 @@ int main() {
                     int subChoice;
                     do {
                         system("cls");
+                        displayUserHeader(members[userIndex]);
                         cout << "--- Member Management Sub-Menu ---\n";
                         cout << "1. Update Member Details\n";
                         cout << "2. Delete Member Account\n";
@@ -263,24 +277,28 @@ int main() {
                         }
                         if (subChoice == 1) {
                             system("cls");
+                            displayUserHeader(members[userIndex]);
                             updateMember(members, memberCount);
                             cout << "\nPress Enter to continue...";
                             cin.ignore(); cin.get();
                         }
                         else if (subChoice == 2) {
                             system("cls");
+                            displayUserHeader(members[userIndex]);
                             deleteMember(members, &memberCount);
                             cout << "\nPress Enter to continue...";
                             cin.ignore(); cin.get();
                         }
                         else if (subChoice == 3) {
                             system("cls");
+                            displayUserHeader(members[userIndex]);
                             searchMember(members, memberCount);
                             cout << "\nPress Enter to continue...";
                             cin.ignore(); cin.get();
                         }
                         else if (subChoice == 4) {
                             system("cls");
+                            displayUserHeader(members[userIndex]);
                             displayMembers(members, memberCount);
                             cout << "\nPress Enter to continue...";
                             cin.ignore(); cin.get();
@@ -305,11 +323,11 @@ int main() {
                 }
                 else if (systemChoice == 3) {
                     system("cls");
-                    trainerSchedulingMenu();
+                    trainerSchedulingMenu(members[userIndex]);
                 }
                 else if (systemChoice == 4) {
                     system("cls");
-                    reportingModule(members, memberCount);
+                    reportingModule(members, memberCount, members[userIndex]);
                 }
             } while (systemChoice != 5);
         }
@@ -322,10 +340,11 @@ int main() {
 // ============================================================
 //  MENU GLUE - Trainer Scheduling
 // ============================================================
-void trainerSchedulingMenu() {
-    int choose = -1;
+void trainerSchedulingMenu(const Member& currentMember) {
+    int choose;
     do {
         system("cls");
+        displayUserHeader(currentMember);
         cout << "========================================" << endl;
         cout << "       TRAINER SCHEDULING & PAYMENTS     " << endl;
         cout << "========================================" << endl;
@@ -339,6 +358,7 @@ void trainerSchedulingMenu() {
         cout << "          0.Back to Main Menu           " << endl;
         cout << "========================================" << endl;
         cout << "Select a function: ";
+        cin >> choose;
         while (cin.fail() || choose < 0 || choose > 7) {
             cin.clear();
             cin.ignore(1000, '\n');
@@ -346,15 +366,15 @@ void trainerSchedulingMenu() {
             cin >> choose;
         }
         switch (choose) {
-        case 1: create_transaction(); break;
-        case 2: modify_transaction(); break;
+        case 1: create_transaction(currentMember.id); break;
+        case 2: modify_transaction(currentMember.id); break;
         case 3: list_transaction(); break;
-        case 4: create_booking(); break;
-        case 5: modify_booking(); break;
+        case 4: create_booking(currentMember); break;
+        case 5: modify_booking(currentMember.id, currentMember); break;
         case 6: search_booking(); break;
-        case 7: display_booking_summary(); break;
+        case 7: display_booking_summary(currentMember.id); break;
         case 0: save_all_data(); break;
-        default: cout << "Invalid choice." << endl; break;
+        default: break;
         }
     } while (choose != 0);
 }
@@ -540,7 +560,8 @@ void saveAllMembersToFile(const Member members[], int count) {
 void display_services(Member members[], int customermembership, int count) {
     int choice;
     do {
-        cout << "\033[2J\033[1;1H";
+        system("cls");
+        displayUserHeader(members[customermembership]);
         cout << "Gym Membership Services" << endl;
         cout << "Please select a service" << endl;
         cout << "1. Add Service" << endl;
@@ -552,26 +573,26 @@ void display_services(Member members[], int customermembership, int count) {
         cout << "Your choice: ";
         cin >> choice;
         if (choice == 1) {
-            cout << "\033[2J\033[1;1H";
+            system("cls");
             add_service(members, customermembership, count);
         }
         else if (choice == 2) {
-            cout << "\033[2J\033[1;1H";
+            system("cls");
             cout << "You have selected remove service." << endl;
             removeservice(members, customermembership, count);
         }
         else if (choice == 3) {
-            cout << "\033[2J\033[1;1H";
+            system("cls");
             cout << "You have selected upgrade service." << endl;
             upgrade_service(members, customermembership, count);
         }
         else if (choice == 4) {
-            cout << "\033[2J\033[1;1H";
+            system("cls");
             cout << "You have selected renew service." << endl;
             renew_service(members, customermembership, count);
         }
         else if (choice == 5) {
-            cout << "\033[2J\033[1;1H";
+            system("cls");
             cout << "You have selected display all service you own." << endl;
             customer_membership(members, customermembership, count);
         }
@@ -579,7 +600,7 @@ void display_services(Member members[], int customermembership, int count) {
             return;
         }
         else {
-            cout << "\033[2J\033[1;1H";
+            system("cls");
             cout << "Invalid choice. Please select a valid option." << endl;
             cin.clear();
             cin.ignore(100, '\n');
@@ -588,6 +609,7 @@ void display_services(Member members[], int customermembership, int count) {
 }
 
 void add_service(Member members[], int customermembership, int count) {
+    displayUserHeader(members[customermembership]);
     cout << "You have selected to add a new service." << endl;
     int addservicechoice;
     cout << "Please select the type of service you would like to add:" << endl;
@@ -603,11 +625,11 @@ void add_service(Member members[], int customermembership, int count) {
     }
     switch (addservicechoice) {
     case 1:
-        cout << "\033[2J\033[1;1H";
+        system("cls");
         personal(members, customermembership, count);
         break;
     case 2:
-        cout << "\033[2J\033[1;1H";
+        system("cls");
         coach(members, customermembership, count);
         break;
     }
@@ -615,13 +637,8 @@ void add_service(Member members[], int customermembership, int count) {
 
 void personal(Member members[], int customermembership, int count) {
     int afteraddservice;
-    cout << "\033[2J\033[1;1H";
-    cout << "===========================================================\n";
-    cout << "LOGGED IN MEMBER : " << members[customermembership].name
-        << " (ID: " << members[customermembership].id << ")\n";
-    cout << "Personal Sub     : " << members[customermembership].personalmembership << "\n";
-    cout << "Coach Sub        : " << members[customermembership].coachmembership << "\n";
-    cout << "===========================================================\n\n";
+    system("cls");
+    displayUserHeader(members[customermembership]);
 
     cout << "You have selected to add Personal Training." << endl;
     cout << "Please choose your interested membership: " << endl;
@@ -675,13 +692,8 @@ void personal(Member members[], int customermembership, int count) {
 
 void coach(Member members[], int customermembership, int count) {
     int afteraddservice_coach;
-    cout << "\033[2J\033[1;1H";
-    cout << "===========================================================\n";
-    cout << "LOGGED IN MEMBER : " << members[customermembership].name
-        << " (ID: " << members[customermembership].id << ")\n";
-    cout << "Personal Sub     : " << members[customermembership].personalmembership << "\n";
-    cout << "Coach Sub        : " << members[customermembership].coachmembership << "\n";
-    cout << "===========================================================\n\n";
+    system("cls");
+    displayUserHeader(members[customermembership]);
 
     cout << "You have selected to add Coach Training." << endl;
     cout << "Please choose your interested membership: " << endl;
@@ -734,6 +746,7 @@ void coach(Member members[], int customermembership, int count) {
 }
 
 void removeservice(Member members[], int customermembership, int count) {
+    displayUserHeader(members[customermembership]);
     cout << "Please select the Membership you want to remove;" << endl;
     cout << "WARNING:Removing membership will not refund your money!!!" << endl;
     cout << "-------- Membership Owned By " << members[customermembership].name << "--------" << endl;
@@ -752,6 +765,7 @@ void removeservice(Member members[], int customermembership, int count) {
     if (removemembership == 1) {
         if (members[customermembership].personalmembership == "None") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "You don't have a Personal Training membership to remove.\n";
             cout << "Press Enter to return" << endl;
             cin.get(); cin.ignore();
@@ -761,6 +775,7 @@ void removeservice(Member members[], int customermembership, int count) {
             members[customermembership].personalmembership = "None";
             saveAllMembersToFile(members, count);
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "You have removed your personal membership" << endl;
             cout << "Press Enter to return" << endl;
             cin.get(); cin.ignore();
@@ -770,6 +785,7 @@ void removeservice(Member members[], int customermembership, int count) {
     else if (removemembership == 2) {
         if (members[customermembership].coachmembership == "None") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "You don't have a Coach Training membership to remove." << endl;
             cout << "Press Enter to return" << endl;
             cin.get(); cin.ignore();
@@ -779,6 +795,7 @@ void removeservice(Member members[], int customermembership, int count) {
             members[customermembership].coachmembership = "None";
             saveAllMembersToFile(members, count);
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "You have removed your coach membership" << endl;
             cout << "Press Enter to return" << endl;
             cin.get(); cin.ignore();
@@ -797,6 +814,7 @@ back:
     int coach_membership_upgrade;
     char year_to_life;
     char coach_year_to_life;
+    displayUserHeader(members[customermembership]);
     cout << "----- Upgrade Membership Services -----" << endl;
     cout << "Please select the service you want to upgrade" << endl;
     cout << "1.Personal Membership:" << members[customermembership].personalmembership << endl;
@@ -813,6 +831,7 @@ back:
     if (option == 1) {
         if (members[customermembership].personalmembership == "None") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "You don't own any personal membership" << endl;
             cout << "Please press enter to choose again" << endl;
             cin.get();
@@ -821,6 +840,7 @@ back:
         }
         else if (members[customermembership].personalmembership == "Monthly membership") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your membership is monthly right now" << endl;
             cout << "Please select the membership plan you want to upgrade to" << endl;
             cout << "1.Yearly membership (RM500/year)" << endl;
@@ -839,6 +859,7 @@ back:
                     members[customermembership].personalmembership = "Yearly membership";
                     saveAllMembersToFile(members, count);
                     system("cls");
+                    displayUserHeader(members[customermembership]);
                     cout << "Thank you for supporting our services" << endl;
                     cout << "Your membership has been updated to yearly plan" << endl;
                     cout << "Press Enter to return to main menu" << endl;
@@ -850,6 +871,7 @@ back:
                     members[customermembership].personalmembership = "Life time membership";
                     saveAllMembersToFile(members, count);
                     system("cls");
+                    displayUserHeader(members[customermembership]);
                     cout << "Thank you for supporting our services" << endl;
                     cout << "Your membership has been updated to Life time plan" << endl;
                     cout << "Press Enter to return to main menu" << endl;
@@ -865,6 +887,7 @@ back:
         }
         else if (members[customermembership].personalmembership == "Yearly membership") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your membership is yearly right now" << endl;
             cout << "Would you like to upgrade to Life time membership?" << endl;
             cout << "press y for yes and n for no" << endl;
@@ -880,6 +903,7 @@ back:
                     members[customermembership].personalmembership = "Life time membership";
                     saveAllMembersToFile(members, count);
                     system("cls");
+                    displayUserHeader(members[customermembership]);
                     cout << "Your membership has been upgraded to Life time" << endl;
                     cout << "THank you for supporting our services" << endl;
                     cout << "Press Enter to return" << endl;
@@ -891,6 +915,7 @@ back:
                     members[customermembership].personalmembership = "Yearly membership";
                     saveAllMembersToFile(members, count);
                     system("cls");
+                    displayUserHeader(members[customermembership]);
                     cout << "Your membership stayed the same" << endl;
                     cout << "Press Enter to return" << endl;
                     cin.get();
@@ -916,6 +941,7 @@ back:
     else if (option == 2) {
         if (members[customermembership].coachmembership == "None") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "You don't own any coach membership" << endl;
             cout << "Please press enter to choose again" << endl;
             cin.get();
@@ -924,6 +950,7 @@ back:
         }
         else if (members[customermembership].coachmembership == "Monthly coach membership") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your coach membership is monthly right now" << endl;
             cout << "Please select the membership plan you want to upgrade to" << endl;
             cout << "1.Yearly coach membership (RM800/year)" << endl;
@@ -942,6 +969,7 @@ back:
                     members[customermembership].coachmembership = "Yearly coach membership";
                     saveAllMembersToFile(members, count);
                     system("cls");
+                    displayUserHeader(members[customermembership]);
                     cout << "Thank you for supporting our services" << endl;
                     cout << "Your coach membership has been updated to yearly plan" << endl;
                     cout << "Press Enter to return to main menu" << endl;
@@ -953,6 +981,7 @@ back:
                     system("cls");
                     members[customermembership].coachmembership = "Life time coach membership";
                     saveAllMembersToFile(members, count);
+                    displayUserHeader(members[customermembership]);
                     cout << "Thank you for supporting our services" << endl;
                     cout << "Your coach membership has been updated to Lifetime plan" << endl;
                     cout << "Press Enter to return to main menu" << endl;
@@ -969,6 +998,7 @@ back:
         else if (members[customermembership].coachmembership == "Yearly coach membership") {
             saveAllMembersToFile(members, count);
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your membership is yearly right now" << endl;
             cout << "Would you like to upgrade to Life time coach membership?" << endl;
             cout << "press y for yes and n for no" << endl;
@@ -978,6 +1008,7 @@ back:
                     members[customermembership].coachmembership = "Life time coach membership";
                     saveAllMembersToFile(members, count);
                     system("cls");
+                    displayUserHeader(members[customermembership]);
                     cout << "Your coach membership has been upgraded to Life time" << endl;
                     cout << "THank you for supporting our services" << endl;
                     cout << "Press Enter to return" << endl;
@@ -989,6 +1020,7 @@ back:
                     members[customermembership].coachmembership = "Yearly coach membership";
                     saveAllMembersToFile(members, count);
                     system("cls");
+                    displayUserHeader(members[customermembership]);
                     cout << "Your coach membership stayed the same" << endl;
                     cout << "Press Enter to return" << endl;
                     cin.get();
@@ -1018,6 +1050,7 @@ back:
 
 void renew_service(Member members[], int customermembership, int count) {
     int pick;
+    displayUserHeader(members[customermembership]);
     cout << "Please choose the membership you want to renew " << endl;
     cout << "----- Membership owned -----" << endl;
     cout << "1.Personal " << members[customermembership].personalmembership << endl;
@@ -1028,6 +1061,7 @@ void renew_service(Member members[], int customermembership, int count) {
     if (pick == 1) {
         if (members[customermembership].personalmembership == "Monthly membership" || members[customermembership].personalmembership == "Yearly membership") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your Personal " << members[customermembership].personalmembership << " will be renew after paying the bills" << endl;
             cout << "Press Enter to proceed to pay" << endl;
             cin.get();
@@ -1035,6 +1069,7 @@ void renew_service(Member members[], int customermembership, int count) {
         }
         else if (members[customermembership].personalmembership == "Life time membership") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your Personal Membership is already a Life time membership" << endl;
             cout << "No Renew is needed" << endl;
             cout << "Press Enter to return to menu" << endl;
@@ -1046,6 +1081,7 @@ void renew_service(Member members[], int customermembership, int count) {
     else if (pick == 2) {
         if (members[customermembership].coachmembership == "Montly coach membership" || members[customermembership].coachmembership == "Yearly coach membership") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your " << members[customermembership].coachmembership << " will be renew after paying the bills" << endl;
             cout << "Press Enter to proceed to pay" << endl;
             cin.get();
@@ -1053,6 +1089,7 @@ void renew_service(Member members[], int customermembership, int count) {
         }
         else if (members[customermembership].coachmembership == "Life time coach membership") {
             system("cls");
+            displayUserHeader(members[customermembership]);
             cout << "Your Personal Membership is already a Life time coach membership" << endl;
             cout << "No Renew is needed" << endl;
             cout << "Press Enter to return to menu" << endl;
@@ -1068,6 +1105,7 @@ void renew_service(Member members[], int customermembership, int count) {
 
 void customer_membership(Member members[], int customermembership, int count) {
     system("cls");
+    displayUserHeader(members[customermembership]);
     cout << "----- Membership owned by " << members[customermembership].name << "-----" << endl;
     cout << "Personal Membership: " << members[customermembership].personalmembership << endl;
     cout << "Coach Membership: " << members[customermembership].coachmembership << endl;
@@ -1195,7 +1233,7 @@ void add_to_history(int userId, const char name[], const char date[], const char
     }
 }
 
-void create_transaction() {
+void create_transaction(int loggedInID) {
     int method;
     cout << "\n---------------------------------------" << endl;
     cout << "|     1. Credit Cards                   |" << endl;
@@ -1209,8 +1247,7 @@ void create_transaction() {
         TransactionRecord tx;
         tx.txId = transaction_count + 1001;
         strcpy(tx.methodType, (method == 1) ? "Credit Card" : "Debit Card");
-        cout << "Enter User ID: ";
-        cin >> tx.userId;
+        tx.userId = loggedInID; // Automatically assigned from logged-in session
         cin.ignore(1000, '\n');
         cout << "Enter Cardholder Name: ";
         cin.getline(tx.cardHolderName, 50);
@@ -1241,7 +1278,7 @@ void create_transaction() {
             transaction_log[transaction_count] = tx;
             transaction_count++;
             save_all_data();
-            cout << "\n[+] Transaction recorded successfully!" << endl;
+            cout << "\n[+] Transaction recorded successfully for User ID " << loggedInID << "!" << endl;
         }
     }
     else {
@@ -1251,15 +1288,9 @@ void create_transaction() {
     cin.get();
 }
 
-void modify_transaction() {
+void modify_transaction(int loggedInID) {
     cout << "\n===== Modify Transaction =====" << endl;
-    int target_id;
-    cout << "Enter your User ID: ";
-    if (!(cin >> target_id)) {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        return;
-    }
+    int target_id = loggedInID; // Automatically use logged in user's ID
     int user_matches[MAX_TRANSACTIONS];
     int match_count = 0;
     for (int i = 0; i < transaction_count; i++) {
@@ -1358,10 +1389,11 @@ void list_transaction() {
     }
     cout << "==================================================================================\n";
     cout << "\nPress Enter to continue...";
+    cin.ignore(1000, '\n');
     cin.get();
 }
 
-bool display_timetable() {
+bool display_timetable(const Member& currentMember) {
     cout << "\n------- SELECT DATE -------" << endl;
     for (int i = 0; i < TOTAL_DATES; i++) {
         cout << (i + 1) << ". " << dateSlot[i] << endl;
@@ -1383,23 +1415,17 @@ bool display_timetable() {
     if (timeChoice <= 0 || timeChoice > TOTAL_TIMES) return false;
     int t = timeChoice - 1;
     if (get_available_places(d, t) > 0) {
-        char bookerName[50];
-        int bookerId;
-        cin.ignore(1000, '\n');
-        cout << "\nEnter Booker Name: ";
-        cin.getline(bookerName, 50);
-        cout << "Enter Booker User ID: ";
-        cin >> bookerId;
         if (booking_count < MAX_BOOKINGS) {
-            bookings[booking_count].userId = bookerId;
-            strcpy(bookings[booking_count].name, bookerName);
+            bookings[booking_count].userId = currentMember.id;
+            strncpy(bookings[booking_count].name, currentMember.name.c_str(), 49);
+            bookings[booking_count].name[49] = '\0';
             bookings[booking_count].dateIdx = d;
             bookings[booking_count].timeIdx = t;
             bookings[booking_count].active = true;
             booking_count++;
-            add_to_history(bookerId, bookerName, dateSlot[d], timeSlot[t], "ACTIVE");
+            add_to_history(currentMember.id, currentMember.name.c_str(), dateSlot[d], timeSlot[t], "ACTIVE");
             save_all_data();
-            cout << "\n[+] Booking confirmed for " << bookerName << " (ID: " << bookerId << ") on "
+            cout << "\n[+] Booking confirmed for " << currentMember.name << " (ID: " << currentMember.id << ") on "
                 << dateSlot[d] << " at " << timeSlot[t] << endl;
         }
     }
@@ -1409,9 +1435,9 @@ bool display_timetable() {
     return true;
 }
 
-void create_booking() {
+void create_booking(const Member& currentMember) {
     cout << "\n===== Create Booking =====" << endl;
-    bool completed = display_timetable();
+    bool completed = display_timetable(currentMember);
     if (completed) {
         cout << "\nPress Enter to return to main menu...";
         cin.ignore(1000, '\n');
@@ -1419,15 +1445,9 @@ void create_booking() {
     }
 }
 
-void modify_booking() {
+void modify_booking(int loggedInID, const Member& currentMember) {
     cout << "\n===== Modify Booking =====" << endl;
-    int target_id;
-    cout << "Enter your User ID: ";
-    if (!(cin >> target_id)) {
-        cin.clear();
-        cin.ignore(1000, '\n');
-        return;
-    }
+    int target_id = loggedInID; // Automatically use logged in ID
     int user_matches[MAX_BOOKINGS];
     int match_count = 0;
     for (int i = 0; i < booking_count; i++) {
@@ -1467,7 +1487,7 @@ void modify_booking() {
     save_all_data();
     cout << "\n[+] Previous booking canceled successfully!" << endl;
     cout << "\n--- Select Your New Booking Slot ---" << endl;
-    bool completed = display_timetable();
+    bool completed = display_timetable(currentMember);
     if (completed) {
         cout << "\nPress Enter to return to main menu...";
         cin.ignore(1000, '\n');
@@ -1525,10 +1545,8 @@ void search_booking() {
     cin.get();
 }
 
-void display_booking_summary() {
-    int target_id;
-    cout << "\nEnter User ID to view summary: ";
-    cin >> target_id;
+void display_booking_summary(int loggedInID) {
+    int target_id = loggedInID; // Automatically use logged in user's ID
     int active_count = 0;
     int cancelled_count = 0;
     char userName[50] = "Unknown User";
@@ -1594,10 +1612,11 @@ int getValidChoiceStudentD(int min, int max) {
     return input;
 }
 
-void reportingModule(const Member members[], int memberCount) {
+void reportingModule(const Member members[], int memberCount, const Member& currentMember) {
     int choice;
     do {
         system("cls");
+        displayUserHeader(currentMember);
         cout << "=========================================\n";
         cout << "      SYSTEM REPORTING & ANALYTICS       \n";
         cout << "=========================================\n";
