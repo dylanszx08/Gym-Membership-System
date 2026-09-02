@@ -162,6 +162,8 @@ int main() {
     int memberCount = 0;
     int portalChoice;
     fstream customer;
+    ofstream openfile("customer.txt", ios::app);
+    openfile.close();
     customer.open("customer.txt", fstream::in);
     if (customer.is_open()) {
         while (memberCount < MAX_MEMBERS && customer >> members[memberCount].id) {
