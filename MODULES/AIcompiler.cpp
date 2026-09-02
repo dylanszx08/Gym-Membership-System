@@ -141,7 +141,7 @@ int getValidChoiceStudentD(int min, int max);
 // ============================================================
 //  FUNCTION PROTOTYPES - Menu glue
 // ============================================================
-void trainerSchedulingMenu(const Member& currentMember);
+void Menutransaction(const Member& currentMember);
 
 // ============================================================
 //  HEADER DISPLAY HELPER
@@ -247,7 +247,7 @@ int main() {
                 cout << "===================================\n";
                 cout << "1. Member Management \n";
                 cout << "2. Member subscription \n";
-                cout << "3. Trainer Scheduling \n";
+                cout << "3. Transaction & Booking \n";
                 cout << "4. Reporting Module \n";
                 cout << "5. Log Out\n";
                 cout << "Choice (1-5): ";
@@ -325,7 +325,7 @@ int main() {
                 }
                 else if (systemChoice == 3) {
                     system("cls");
-                    trainerSchedulingMenu(members[userIndex]);
+                    Menutransaction(members[userIndex]);
                 }
                 else if (systemChoice == 4) {
                     system("cls");
@@ -342,13 +342,13 @@ int main() {
 // ============================================================
 //  MENU GLUE - Trainer Scheduling
 // ============================================================
-void trainerSchedulingMenu(const Member& currentMember) {
+void Menutransaction(const Member& currentMember) {
     int choose;
     do {
         system("cls");
         displayUserHeader(currentMember);
         cout << "========================================" << endl;
-        cout << "       TRAINER SCHEDULING & PAYMENTS     " << endl;
+        cout << "         TRANSACTION & BOOKING          " << endl;
         cout << "========================================" << endl;
         cout << "          1.Create Transaction          " << endl;
         cout << "          2.Modify Transaction          " << endl;
