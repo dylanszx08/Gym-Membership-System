@@ -243,10 +243,10 @@ int main() {
                 cout << "===================================\n";
                 cout << "        GYM MEMBERSHIP SYSTEM       \n";
                 cout << "===================================\n";
-                cout << "1. Member Management (Sub-Menu)\n";
-                cout << "2. Member subscription (Teammate B Module)\n";
-                cout << "3. Trainer Scheduling (Teammate C Module)\n";
-                cout << "4. Reporting Module (Student D Module)\n";
+                cout << "1. Member Management \n";
+                cout << "2. Member subscription \n";
+                cout << "3. Trainer Scheduling \n";
+                cout << "4. Reporting Module \n";
                 cout << "5. Log Out\n";
                 cout << "Choice (1-5): ";
                 cin >> systemChoice;
