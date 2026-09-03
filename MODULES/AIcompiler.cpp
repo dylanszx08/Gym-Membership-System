@@ -348,7 +348,7 @@ void Menutransaction(const Member& currentMember) {
         system("cls");
         displayUserHeader(currentMember);
         cout << "========================================" << endl;
-        cout << "         TRANSACTION & BOOKING          " << endl;
+        cout << "       TRAINER SCHEDULING & PAYMENTS     " << endl;
         cout << "========================================" << endl;
         cout << "          1.Create Transaction          " << endl;
         cout << "          2.Modify Transaction          " << endl;
@@ -1055,8 +1055,8 @@ void renew_service(Member members[], int customermembership, int count) {
     displayUserHeader(members[customermembership]);
     cout << "Please choose the membership you want to renew " << endl;
     cout << "----- Membership owned -----" << endl;
-    cout << "1.Personal " << members[customermembership].personalmembership << endl;
-    cout << "2.Coach " << members[customermembership].coachmembership << endl;
+    cout << "1.Personal: " << members[customermembership].personalmembership << endl;
+    cout << "2.Coach: " << members[customermembership].coachmembership << endl;
     cout << "3.Back to menu" << endl;
     cout << "Your Choice:";
     cin >> pick;
