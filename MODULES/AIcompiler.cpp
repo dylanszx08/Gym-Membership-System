@@ -518,9 +518,28 @@ void displayMembers(Member members[], int count) {
         cout << "No registered members yet.\n";
         return;
     }
+    cout << "\n--- Sort Order ---\n";
+    cout << "1. Ascending (Low to High ID)\n";
+    cout << "2. Descending (High to Low ID)\n";
+    cout << "Choose sort order (1-2): ";
+    int sortOrder;
+    cin >> sortOrder;
+    while (cin.fail() || sortOrder < 1 || sortOrder > 2) {
+        cin.clear();
+        cin.ignore(100, '\n');
+        cout << "Invalid choice! Enter 1-2: ";
+        cin >> sortOrder;
+    }
     for (int i = 0; i < count - 1; i++) {
         for (int j = 0; j < count - i - 1; j++) {
-            if (members[j].id > members[j + 1].id) {
+            bool swapNeeded = false;
+            if (sortOrder == 1) {
+                if (members[j].id > members[j + 1].id) swapNeeded = true; // Ascending
+            }
+            else {
+                if (members[j].id < members[j + 1].id) swapNeeded = true; // Descending
+            }
+            if (swapNeeded) {
                 Member temp = members[j];
                 members[j] = members[j + 1];
                 members[j + 1] = temp;
@@ -604,8 +623,6 @@ void display_services(Member members[], int customermembership, int count) {
         else {
             system("cls");
             cout << "Invalid choice. Please select a valid option." << endl;
-            cin.clear();
-            cin.ignore(100, '\n');
         }
     } while (choice != 6);
 }
@@ -894,8 +911,7 @@ back:
             cout << "Would you like to upgrade to Life time membership?" << endl;
             cout << "press y for yes and n for no" << endl;
             cin >> year_to_life;
-            while (cin.fail() || (year_to_life != 'y' && year_to_life != 'Y' && year_to_life != 'n' && year_to_life != 'N')) {
-                cin.clear();
+            while (year_to_life != 'y' && year_to_life != 'Y' && year_to_life != 'n' && year_to_life != 'N') {
                 cin.ignore(100, '\n');
                 cout << "Invalid choice! Enter y or n: ";
                 cin >> year_to_life;
