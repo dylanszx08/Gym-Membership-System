@@ -183,7 +183,7 @@ int main() {
     }
 
     load_all_data();
-    srand(static_cast<unsigned int>(time(NULL)));
+    srand((time(NULL)));
 
     do {
         system("cls");
